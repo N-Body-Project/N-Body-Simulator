@@ -5,6 +5,12 @@ if (-not (Get-Command rustfmt -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
+# Clippy
+# MEMO: Uknown behaviour, adjust as we go.
+Write-Host "||Running clippy..." -ForegroundColor Yellow
+cargo clippy --all-targets --all-features
+
+
 # Build the project
 Write-Host "||Building debug build..." -ForegroundColor Yellow
 cargo build
@@ -25,8 +31,3 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "||Formatting Failed." -ForegroundColor Red -BackgroundColor Red
     exit 1
 }
-
-# Clippy
-# MEMO: Uknown behaviour, adjust as we go.
-Write-Host "||Running clippy..." -ForegroundColor Yellow
-cargo clippy
