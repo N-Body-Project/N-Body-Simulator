@@ -34,4 +34,11 @@ fn main() {
 
     let forces = system.compute_all_forces();
     println!("{:?}", forces);
+    //
+    for i in 0..3 {
+        let p = system.get_particle_by_index(i).expect("REASON");
+        p.update_particle_euler(forces[i], 0.1);
+        println!("Velocity result {:?}", p.velocity());
+        println!("     Pos result {:?}", p.pos());
+    }
 }
