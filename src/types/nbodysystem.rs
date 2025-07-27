@@ -1,11 +1,23 @@
 use super::particle::Particle;
 use crate::physics::gravity::gravitational_force;
 use rayon::prelude::*;
+use std::sync::atomic::{AtomicU16, Ordering};
 use vecmath::{Vector3, vec3_add, vec3_neg};
 
-#[derive(Default)]
 pub struct NBodySystem {
     m_particles: Vec<Particle>,
+    m_output: bool,
+    m_limit: u16,
+}
+
+impl Default for NBodySystem {
+    fn default() -> Self {
+        Self {
+            m_particles: Vec::new(),
+            m_output: false,
+            m_limit: 1000,
+        }
+    }
 }
 
 impl NBodySystem {
@@ -55,9 +67,10 @@ impl NBodySystem {
 
     pub fn compute_all_forces(&self) -> Vec<Vector3<f64>> {
         if self.m_particles.is_empty() {
-            println!("No particles in system");
             return Default::default();
         }
+
+        self.output();
 
         let particle_count = self.m_particles.len();
 
@@ -97,5 +110,33 @@ impl NBodySystem {
                     acc
                 },
             )
+    }
+
+    pub fn set_output(&mut self, output: bool) {
+        self.m_output = output;
+    }
+
+    pub fn set_limit(&mut self, limit: u16) {
+        self.m_limit = limit;
+    }
+    fn output(&self) {
+        static OUTPUT: AtomicU16 = AtomicU16::new(1);
+
+        let count = OUTPUT.fetch_add(1, Ordering::SeqCst);
+
+        if self.m_output && count == self.m_limit {
+            println!("{:?}", self.m_particles);
+
+            for particle in self.m_particles.iter() {
+                println!(
+                    "Particle: [{}] POS: {:?}; Velocity: {:?};",
+                    particle.id(),
+                    particle.pos(),
+                    particle.velocity()
+                );
+            }
+
+            OUTPUT.store(0, Ordering::SeqCst);
+        }
     }
 }
